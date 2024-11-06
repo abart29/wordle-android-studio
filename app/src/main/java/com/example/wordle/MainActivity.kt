@@ -21,6 +21,7 @@ import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -98,52 +99,57 @@ fun RowOfLetters(
 fun TextBoxRow() {
     val focusManager = LocalFocusManager.current
     var letter1 by remember { mutableStateOf("") }
-//    val onLetter1Change = { letter1 = it }
     var letter2 by remember { mutableStateOf("") }
     var letter3 by remember { mutableStateOf("") }
     var letter4 by remember { mutableStateOf("") }
     var letter5 by remember { mutableStateOf("") }
-    LaunchedEffect(key1 = letter1) {
-        if (letter1.isNotEmpty()) {
-            focusManager.moveFocus(
-                focusDirection = FocusDirection.Next
-            )
-        }
-    }
-    LaunchedEffect(key1 = letter2) {
-        if (letter1.isNotEmpty()) {
-            focusManager.moveFocus(
-                focusDirection = FocusDirection.Next
-            )
-        }
-    }
-    LaunchedEffect(key1 = letter3) {
-        if (letter1.isNotEmpty()) {
-            focusManager.moveFocus(
-                focusDirection = FocusDirection.Next
-            )
-        }
-    }
-    LaunchedEffect(key1 = letter4) {
-        if (letter1.isNotEmpty()) {
-            focusManager.moveFocus(
-                focusDirection = FocusDirection.Next
-            )
-        }
-    }
+
+//    val letters = mutableListOf(letter1, letter2, letter3, letter4, letter5)
+
+//    val letters = remember { List(5) { mutableStateOf("") } }
+
+    var word by remember { mutableStateOf("") }
+
+//    LaunchedEffect(key1 = word[0]) {
+//        if (word[0].isLetter() ) {
+//            focusManager.moveFocus(
+//                focusDirection = FocusDirection.Next
+//            )
+//        }
+//    }
+//    LaunchedEffect(key1 = word[1]) {
+//        if (word[1].isLetter()) {
+//            focusManager.moveFocus(
+//                focusDirection = FocusDirection.Next
+//            )
+//        }
+//    }
+//    LaunchedEffect(key1 = word[2]) {
+//        if (word[2].isLetter()) {
+//            focusManager.moveFocus(
+//                focusDirection = FocusDirection.Next
+//            )
+//        }
+//    }
+//    LaunchedEffect(key1 = word[3]) {
+//        if (word[3].isLetter()) {
+//            focusManager.moveFocus(
+//                focusDirection = FocusDirection.Next
+//            )
+//        }
+//    }
 
     Row {
-        TextBox(input = letter1, onTextChange = {letter1 = it})
-        TextBox(input = letter2, onTextChange = {letter2 = it})
-        TextBox(input = letter3, onTextChange = {letter3 = it})
-        TextBox(input = letter4, onTextChange = {letter4 = it})
-        TextBox(input = letter5, onTextChange = {letter5 = it})
+        TextBox(input = word[0].toString(), onTextChange = {word += it})
+        TextBox(input = word[1].toString(), onTextChange = {word += it})
+        TextBox(input = word[2].toString(), onTextChange = {word += it})
+        TextBox(input = word[3].toString(), onTextChange = {word += it})
+        TextBox(input = word[4].toString(), onTextChange = {word += it})
     }
 }
 
 @Composable
 fun TextBox(input:String, onTextChange: (String) -> Unit) {
-//    var input by remember { mutableStateOf("") }
     Card(
        modifier = Modifier.size(width = 50.dp, height = 50.dp),
         border = BorderStroke(width = 2.dp, color = Color.Blue)
@@ -160,14 +166,6 @@ fun TextBox(input:String, onTextChange: (String) -> Unit) {
         )
     }
 }
-
-//@Preview(showBackground = true)
-//@Composable
-//fun TextBoxPreview() {
-//    WordleTheme {
-////        TextBox()
-//    }
-//}
 
 
 @Preview(showBackground = true)
