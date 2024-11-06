@@ -36,6 +36,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.wordle.ui.theme.WordleTheme
 import java.util.Collections.list
+import kotlin.reflect.typeOf
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -98,17 +99,17 @@ fun RowOfLetters(
 @Composable
 fun TextBoxRow() {
     val focusManager = LocalFocusManager.current
-    var letter1 by remember { mutableStateOf("") }
-    var letter2 by remember { mutableStateOf("") }
-    var letter3 by remember { mutableStateOf("") }
-    var letter4 by remember { mutableStateOf("") }
-    var letter5 by remember { mutableStateOf("") }
+//    var letter1 by remember { mutableStateOf("") }
+//    var letter2 by remember { mutableStateOf("") }
+//    var letter3 by remember { mutableStateOf("") }
+//    var letter4 by remember { mutableStateOf("") }
+//    var letter5 by remember { mutableStateOf("") }
 
 //    val letters = mutableListOf(letter1, letter2, letter3, letter4, letter5)
 
 //    val letters = remember { List(5) { mutableStateOf("") } }
 
-    var word by remember { mutableStateOf("") }
+    var word: String by remember { mutableStateOf("") }
 
 //    LaunchedEffect(key1 = word[0]) {
 //        if (word[0].isLetter() ) {
@@ -139,12 +140,13 @@ fun TextBoxRow() {
 //        }
 //    }
 
+
     Row {
-        TextBox(input = word[0].toString(), onTextChange = {word += it})
-        TextBox(input = word[1].toString(), onTextChange = {word += it})
-        TextBox(input = word[2].toString(), onTextChange = {word += it})
-        TextBox(input = word[3].toString(), onTextChange = {word += it})
-        TextBox(input = word[4].toString(), onTextChange = {word += it})
+        TextBox(input = word.getOrElse(0) {' '}.toString(), onTextChange = {word += it})
+        TextBox(input = word.getOrElse(1) {' '}.toString(), onTextChange = {word += it})
+        TextBox(input = word.getOrElse(2) {' '}.toString(), onTextChange = {word += it})
+        TextBox(input = word.getOrElse(3) {' '}.toString(), onTextChange = {word += it})
+        TextBox(input = word.getOrElse(4) {' '}.toString(), onTextChange = {word += it})
     }
 }
 
