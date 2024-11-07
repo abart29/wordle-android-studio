@@ -50,6 +50,13 @@ class MainActivity : ComponentActivity() {
 @Composable
 fun WordleApp() {
 
+    var word1: List<String> by remember { mutableStateOf(listOf("", "", "", "", "")) }
+    var word2: List<String> by remember { mutableStateOf(listOf("", "", "", "", "")) }
+    var word3: List<String> by remember { mutableStateOf(listOf("", "", "", "", "")) }
+    var word4: List<String> by remember { mutableStateOf(listOf("", "", "", "", "")) }
+    var word5: List<String> by remember { mutableStateOf(listOf("", "", "", "", "")) }
+    var word6: List<String> by remember { mutableStateOf(listOf("", "", "", "", "")) }
+
     Column(
         modifier = Modifier
             .padding(horizontal = 40.dp),
@@ -62,25 +69,27 @@ fun WordleApp() {
             modifier = Modifier
                 .padding(80.dp)
         )
-        Row {
-            TextBoxRow()
-        }
-
+            TextBoxRow(word1, {word1 = it})
+            TextBoxRow(word2, {word2 = it})
+            TextBoxRow(word3, {word3 = it})
+            TextBoxRow(word4, {word4 = it})
+            TextBoxRow(word5, {word5 = it})
+            TextBoxRow(word6, {word6 = it})
     }
 }
 
 
 @Composable
-fun TextBoxRow() {
+fun TextBoxRow(word: List<String>, onWordChange: (List<String>) -> Unit) {
     val focusManager = LocalFocusManager.current
-    var word: List<String> by remember { mutableStateOf(listOf("", "", "", "", "")) }
+
     Row {
         word.forEachIndexed { index, letter: String ->
             TextBox(input = letter, onTextChange = {
                 if (it == "" || it[0].isLetter()) {
                     val newList = word.toMutableList()
                     newList[index] = it.uppercase()
-                    word = newList
+                    onWordChange(newList)
                 }
             })
             HandleFocusChange(letter, index, focusManager)
