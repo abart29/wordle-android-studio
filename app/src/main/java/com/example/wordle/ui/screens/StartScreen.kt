@@ -1,5 +1,6 @@
 package com.example.wordle.ui.screens
 
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -22,18 +23,21 @@ import com.example.wordle.ui.theme.WordleTheme
 fun StartScreen(onNextScreen: () -> Unit) {
     Column(
         modifier = Modifier
-            .padding(horizontal = 40.dp).
-            fillMaxWidth(),
-        horizontalAlignment = Alignment.CenterHorizontally
+            .padding(horizontal = 20.dp)
+            .fillMaxWidth(),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center
     ) {
     Text(
         text = "Welcome to Wordle!",
-        fontSize = 20.sp,
+        fontSize = 35.sp,
         fontWeight = FontWeight.Bold,
         textAlign = TextAlign.Center,
         modifier = Modifier
-            .padding(bottom = 15.dp)
+            .fillMaxWidth()
+            .padding(bottom = 40.dp)
     )
+
         WordleRules()
     Button(onClick = onNextScreen) {
         Text("Click to play!")
