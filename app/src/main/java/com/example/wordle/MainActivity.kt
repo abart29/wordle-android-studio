@@ -47,9 +47,10 @@ class MainActivity : ComponentActivity() {
     }
 }
 
+val wordToGuess = listOf("T", "E", "E", "T", "H")
+
 @Composable
 fun WordleApp() {
-
     var word1: List<String> by remember { mutableStateOf(listOf("", "", "", "", "")) }
     var word2: List<String> by remember { mutableStateOf(listOf("", "", "", "", "")) }
     var word3: List<String> by remember { mutableStateOf(listOf("", "", "", "", "")) }
@@ -69,12 +70,12 @@ fun WordleApp() {
             modifier = Modifier
                 .padding(80.dp)
         )
-            TextBoxRow(word1, {word1 = it})
-            TextBoxRow(word2, {word2 = it})
-            TextBoxRow(word3, {word3 = it})
-            TextBoxRow(word4, {word4 = it})
-            TextBoxRow(word5, {word5 = it})
-            TextBoxRow(word6, {word6 = it})
+        if (word1[4].isEmpty()) TextBoxRow(word1) { word1 = it } else WordGuess(word = word1)
+        if (word2[4].isEmpty()) TextBoxRow(word2) { word2 = it } else WordGuess(word = word2)
+        if (word3[4].isEmpty()) TextBoxRow(word3) { word3 = it } else WordGuess(word = word3)
+        if (word4[4].isEmpty()) TextBoxRow(word4) { word4 = it } else WordGuess(word = word4)
+        if (word5[4].isEmpty()) TextBoxRow(word5) { word5 = it } else WordGuess(word = word5)
+        if (word6[4].isEmpty()) TextBoxRow(word6) { word6 = it } else WordGuess(word = word6)
     }
 }
 
@@ -85,7 +86,7 @@ fun TextBoxRow(word: List<String>, onWordChange: (List<String>) -> Unit) {
 
     Row {
         word.forEachIndexed { index, letter: String ->
-            TextBox(input = letter, onTextChange = {
+            TextBox(input = letter, index = index, onTextChange = {
                 if (it == "" || it[0].isLetter()) {
                     val newList = word.toMutableList()
                     newList[index] = it.uppercase()
@@ -98,7 +99,8 @@ fun TextBoxRow(word: List<String>, onWordChange: (List<String>) -> Unit) {
 }
 
 @Composable
-fun TextBox(input: String, onTextChange: (String) -> Unit) {
+fun TextBox(input: String, index: Int, onTextChange: (String) -> Unit) {
+
     Card(
         modifier = Modifier.size(width = 50.dp, height = 50.dp),
         border = BorderStroke(width = 2.dp, color = Color.Blue)
@@ -111,9 +113,25 @@ fun TextBox(input: String, onTextChange: (String) -> Unit) {
                 focusedIndicatorColor = Color.Transparent,
                 disabledIndicatorColor = Color.Transparent,
             ),
-
         )
     }
+}
+
+@Composable
+fun WordGuess(word: List<String>) {
+    val borderColors = checkWord(wordToGuess = wordToGuess, guessedWord = word)
+    Row {
+        word.zip(borderColors).forEach { pair ->
+
+            Card(
+                modifier = Modifier.size(width = 50.dp, height = 50.dp),
+                border = BorderStroke(width = 2.dp, color = pair.component2())
+            ) {
+                Text(pair.component1(), modifier = Modifier.fillMaxSize())
+            }
+        }
+    }
+
 }
 
 
@@ -139,4 +157,25 @@ private fun HandleFocusChange(letter: String, index: Int, focusManager: FocusMan
             )
         }
     }
+}
+
+private fun checkWord(wordToGuess: List<String>, guessedWord: List<String>): MutableList<Color> {
+    val borderColorsList = mutableListOf(Color.Gray, Color.Gray, Color.Gray, Color.Gray, Color.Gray)
+    val newWordToGuess = wordToGuess.toMutableList()
+    val newGuessedWord = guessedWord.toMutableList()
+
+    guessedWord.forEachIndexed { index, letter ->
+        if (letter == wordToGuess[index]) {
+            borderColorsList[index] = Color.Green
+            newWordToGuess[index] = ""
+            newGuessedWord[index] = ""
+        }
+    }
+    newGuessedWord.forEachIndexed { index, letter ->
+        if (letter.isNotEmpty() && newWordToGuess.contains(letter)) {
+            borderColorsList[index] = Color.Yellow
+        }
+    }
+
+    return borderColorsList
 }
