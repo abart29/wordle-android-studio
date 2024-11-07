@@ -1,10 +1,8 @@
 package com.example.wordle.ui.screens
 
 import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.Button
@@ -15,6 +13,7 @@ import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -35,7 +34,9 @@ var wordToGuess = listOf("T", "E", "E", "T", "H")
 @Composable
 fun InGameScreen(onNextScreen: () -> Unit) {
 
-    var isGameOver by remember { mutableStateOf(false) }
+    var hasPlayerWon by remember { mutableStateOf(false) }
+    var hasPlayerLost by remember { mutableStateOf(false) }
+    var currentPlayerWord by remember { mutableIntStateOf(1) }
 
     var word1: List<String> by remember { mutableStateOf(listOf("", "", "", "", "")) }
     var word2: List<String> by remember { mutableStateOf(listOf("", "", "", "", "")) }
@@ -48,36 +49,75 @@ fun InGameScreen(onNextScreen: () -> Unit) {
     Column(
         modifier = Modifier
             .padding(horizontal = 40.dp),
-        horizontalAlignment = Alignment.CenterHorizontally
+        horizontalAlignment = Alignment.CenterHorizontally,
     ) {
         GameTitle()
         HandlePlayerGuess(
             word = word1,
             setWord = { word1 = it },
-            setIsGameOver = { isGameOver = true })
+            wordNumber = 1,
+            currentPlayerWord = currentPlayerWord,
+            setCurrentPlayerWord = { currentPlayerWord = it },
+            setHasPlayerLost = { hasPlayerLost = true},
+            setHasPlayerWon = { hasPlayerWon = true })
         HandlePlayerGuess(
             word = word2,
             setWord = { word2 = it },
-            setIsGameOver = { isGameOver = true })
+            wordNumber = 2,
+            currentPlayerWord = currentPlayerWord,
+            setCurrentPlayerWord = { currentPlayerWord = it },
+            setHasPlayerLost = { hasPlayerLost = true},
+            setHasPlayerWon = { hasPlayerWon = true })
         HandlePlayerGuess(
             word = word3,
             setWord = { word3 = it },
-            setIsGameOver = { isGameOver = true })
+            wordNumber = 3,
+            currentPlayerWord = currentPlayerWord,
+            setCurrentPlayerWord = { currentPlayerWord = it },
+            setHasPlayerLost = { hasPlayerLost = true},
+            setHasPlayerWon = { hasPlayerWon = true })
         HandlePlayerGuess(
             word = word4,
             setWord = { word4 = it },
-            setIsGameOver = { isGameOver = true })
+            wordNumber = 4,
+            currentPlayerWord = currentPlayerWord,
+            setCurrentPlayerWord = { currentPlayerWord = it },
+            setHasPlayerLost = { hasPlayerLost = true},
+            setHasPlayerWon = { hasPlayerWon = true })
         HandlePlayerGuess(
             word = word5,
             setWord = { word5 = it },
-            setIsGameOver = { isGameOver = true })
+            wordNumber = 5,
+            currentPlayerWord = currentPlayerWord,
+            setCurrentPlayerWord = { currentPlayerWord += 1 },
+            setHasPlayerLost = { hasPlayerLost = true},
+            setHasPlayerWon = { hasPlayerWon = true })
         HandlePlayerGuess(
             word = word6,
             setWord = { word6 = it },
-            setIsGameOver = { isGameOver = true })
+            wordNumber = 6,
+            currentPlayerWord = currentPlayerWord,
+            setCurrentPlayerWord = { currentPlayerWord = it },
+            setHasPlayerLost = { hasPlayerLost = true},
+            setHasPlayerWon = { hasPlayerWon = true })
 
-        if (isGameOver) {
-            Text("You Win!!!")
+
+        if (hasPlayerWon) {
+            Text(
+                text = "You Win!!!",
+                fontSize = 30.sp,
+                modifier = Modifier.padding(15.dp)
+            )
+            Button(onClick = onNextScreen) {
+                Text("Click to finish!")
+            }
+        }
+        if (hasPlayerLost) {
+            Text(
+                text = "You Lose!!!",
+                fontSize = 30.sp,
+                modifier = Modifier.padding(15.dp)
+            )
             Button(onClick = onNextScreen) {
                 Text("Click to finish!")
             }
@@ -93,17 +133,17 @@ fun GameTitle() {
         fontSize = 45.sp,
         fontWeight = FontWeight.Bold,
         modifier = Modifier
-            .padding(40.dp)
+            .padding(top = 180.dp, bottom = 30.dp)
     )
 }
 
 @Composable
-fun WordInputRow(word: List<String>, onWordChange: (List<String>) -> Unit) {
+fun WordInputRow(word: List<String>, onWordChange: (List<String>) -> Unit, isDisabled: Boolean) {
     val focusManager = LocalFocusManager.current
 
     Row {
         word.forEachIndexed { index, letter: String ->
-            WordInputCard(input = letter, onTextChange = {
+            WordInputCard(input = letter, isDisabled, onTextChange = {
                 if (it == "" || it[0].isLetter()) {
                     val newList = word.toMutableList()
                     newList[index] = it.uppercase()
@@ -119,12 +159,12 @@ fun WordInputRow(word: List<String>, onWordChange: (List<String>) -> Unit) {
 @Composable
 fun WordInputRowPreview() {
     WordleTheme {
-        WordInputRow(listOf("H","E","L","L","O"), onWordChange = {})
+        WordInputRow(listOf("H", "E", "L", "L", "O"), isDisabled = false, onWordChange = {})
     }
 }
 
 @Composable
-fun WordInputCard(input: String, onTextChange: (String) -> Unit) {
+fun WordInputCard(input: String, isDisabled: Boolean, onTextChange: (String) -> Unit) {
 
     Card(
         modifier = Modifier.size(width = 50.dp, height = 50.dp),
@@ -138,6 +178,7 @@ fun WordInputCard(input: String, onTextChange: (String) -> Unit) {
                 focusedIndicatorColor = Color.Transparent,
                 disabledIndicatorColor = Color.Transparent,
             ),
+            readOnly = isDisabled
         )
     }
 }
@@ -172,7 +213,7 @@ fun PlayerGuessResult(word: List<String>) {
 @Composable
 fun PlayerGuessResultPreview() {
     WordleTheme {
-        PlayerGuessResult(listOf("H","E","L","L","O"))
+        PlayerGuessResult(listOf("H", "E", "L", "L", "O"))
     }
 }
 
@@ -196,26 +237,27 @@ private fun HandleKeyboardFocusChange(letter: String, index: Int, focusManager: 
 fun HandlePlayerGuess(
     word: List<String>,
     setWord: (List<String>) -> Unit,
-    setIsGameOver: (Boolean) -> Unit
-) {
-    if (word[4].isEmpty()) {
-        WordInputRow(word, setWord)
+    setHasPlayerWon: (Boolean) -> Unit,
+    wordNumber: Int,
+    currentPlayerWord: Int,
+    setCurrentPlayerWord: (Int) -> Unit,
+    setHasPlayerLost: (Boolean) -> Unit) {
+    if (wordNumber == currentPlayerWord) {
+        if (word[4].isEmpty()) {
+            WordInputRow(word, setWord, false)
+        } else {
+            PlayerGuessResult(word = word)
+            setCurrentPlayerWord(currentPlayerWord + 1)
+            if (wordToGuess == word) setHasPlayerWon(true)
+        }
     } else {
-        PlayerGuessResult(word = word)
-        CheckPlayerWins(
-            guessedWord = word,
-            setIsGameOver = setIsGameOver
-        )
-    }
-}
+        if (word[4].isEmpty()) {
+            WordInputRow(word, setWord, true)
+        } else {
+            PlayerGuessResult(word = word)
+            if (currentPlayerWord == 7) setHasPlayerLost(true)
 
-@Composable
-private fun CheckPlayerWins(
-    guessedWord: List<String>,
-    setIsGameOver: (Boolean) -> Unit
-) {
-    if (wordToGuess == guessedWord) {
-        setIsGameOver(true)
+        }
     }
 }
 
@@ -241,10 +283,11 @@ private fun checkWord(wordToGuess: List<String>, guessedWord: List<String>): Mut
     return borderColorsList
 }
 
-//@Preview(showBackground = true)
-//@Composable
-//fun InGamePreview() {
-//    WordleTheme {
-//        InGameScreen(onNextScreen = {})
-//    }
-//}
+@Preview(showBackground = true, device = "id:pixel_5")
+@Composable
+fun InGamePreview() {
+    WordleTheme {
+        InGameScreen(onNextScreen = {})
+    }
+}
+
