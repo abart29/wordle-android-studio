@@ -10,13 +10,20 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Info
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Button
 import androidx.compose.material3.Card
+import androidx.compose.material3.Icon
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -26,6 +33,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusDirection
 import androidx.compose.ui.focus.FocusManager
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
@@ -47,16 +55,23 @@ class MainActivity : ComponentActivity() {
     }
 }
 
-val wordToGuess = listOf("T", "E", "E", "T", "H")
+var wordToGuess = listOf("T", "E", "E", "T", "H")
 
 @Composable
-fun WordleApp() {
+fun WordleApp(){
+
+    var openAlertDialog by remember { mutableStateOf(false) }
+
     var word1: List<String> by remember { mutableStateOf(listOf("", "", "", "", "")) }
     var word2: List<String> by remember { mutableStateOf(listOf("", "", "", "", "")) }
     var word3: List<String> by remember { mutableStateOf(listOf("", "", "", "", "")) }
     var word4: List<String> by remember { mutableStateOf(listOf("", "", "", "", "")) }
     var word5: List<String> by remember { mutableStateOf(listOf("", "", "", "", "")) }
     var word6: List<String> by remember { mutableStateOf(listOf("", "", "", "", "")) }
+
+
+    val shouldShowDialog = remember { mutableStateOf(false) } // 1
+
 
     Column(
         modifier = Modifier
@@ -70,15 +85,26 @@ fun WordleApp() {
             modifier = Modifier
                 .padding(80.dp)
         )
-        if (word1[4].isEmpty()) TextBoxRow(word1) { word1 = it } else WordGuess(word = word1)
-        if (word2[4].isEmpty()) TextBoxRow(word2) { word2 = it } else WordGuess(word = word2)
-        if (word3[4].isEmpty()) TextBoxRow(word3) { word3 = it } else WordGuess(word = word3)
-        if (word4[4].isEmpty()) TextBoxRow(word4) { word4 = it } else WordGuess(word = word4)
-        if (word5[4].isEmpty()) TextBoxRow(word5) { word5 = it } else WordGuess(word = word5)
-        if (word6[4].isEmpty()) TextBoxRow(word6) { word6 = it } else WordGuess(word = word6)
+        if (word1[4].isEmpty()) {
+            TextBoxRow(word1) { word1 = it }
+        } else {
+            WordGuess(word = word1)
+            CheckPlayerWins(
+                guessedWord = word1,
+                onOpenAlert = {shouldShowDialog.value = true}
+            )
+        }
+    if (shouldShowDialog.value) {
+        MyAlertDialog(shouldShowDialog = shouldShowDialog)
+    }
+//            if (word1[4].isEmpty()) TextBoxRow(word1) { word1 = it } else WordGuess(word = word1)
+//            if (word2[4].isEmpty()) TextBoxRow(word2) { word2 = it } else WordGuess(word = word2)
+//            if (word3[4].isEmpty()) TextBoxRow(word3) { word3 = it } else WordGuess(word = word3)
+//            if (word4[4].isEmpty()) TextBoxRow(word4) { word4 = it } else WordGuess(word = word4)
+//            if (word5[4].isEmpty()) TextBoxRow(word5) { word5 = it } else WordGuess(word = word5)
+//            if (word6[4].isEmpty()) TextBoxRow(word6) { word6 = it } else WordGuess(word = word6)
     }
 }
-
 
 @Composable
 fun TextBoxRow(word: List<String>, onWordChange: (List<String>) -> Unit) {
@@ -158,6 +184,42 @@ private fun HandleFocusChange(letter: String, index: Int, focusManager: FocusMan
         }
     }
 }
+
+@Composable
+fun MyAlertDialog(shouldShowDialog: MutableState<Boolean>) {
+    if (shouldShowDialog.value) { // 2
+        AlertDialog( // 3
+            onDismissRequest = { // 4
+                shouldShowDialog.value = false
+            },
+            // 5
+            title = { Text(text = "Alert Dialog") },
+            text = { Text(text = "Jetpack Compose Alert Dialog") },
+            confirmButton = { // 6
+                Button(
+                    onClick = {
+                        shouldShowDialog.value = false
+                    }
+                ) {
+                    Text(
+                        text = "Confirm",
+                        color = Color.White
+                    )
+                }
+            }
+        )
+    }
+}
+
+
+@Composable
+private fun CheckPlayerWins (guessedWord: List<String>, onOpenAlert: (Boolean) -> Unit) {
+    if (wordToGuess == guessedWord) {
+        wordToGuess = listOf("", "", "", "", "")
+        onOpenAlert(true)
+        }
+    }
+
 
 private fun checkWord(wordToGuess: List<String>, guessedWord: List<String>): MutableList<Color> {
     val borderColorsList = mutableListOf(Color.Gray, Color.Gray, Color.Gray, Color.Gray, Color.Gray)
