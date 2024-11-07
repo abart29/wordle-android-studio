@@ -67,7 +67,7 @@ fun WordleRules() {
         )
         Spacer(modifier = Modifier.height(3.dp))
         Text(
-            text = "• Gray Border: The letter is not in the word at all.",
+            text = "• Grey Border: The letter is not in the word at all.",
             modifier = Modifier.padding(start = 8.dp)
         )
         Spacer(modifier = Modifier.height(5.dp))
