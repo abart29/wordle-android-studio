@@ -12,11 +12,8 @@ import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusDirection
@@ -27,24 +24,17 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.wordle.ui.WordleViewModel
 import com.example.wordle.ui.theme.WordleTheme
 
-var wordToGuess = listOf("T", "E", "E", "T", "H")
 
 @Composable
-fun InGameScreen(onNextScreen: () -> Unit) {
-
-    var hasPlayerWon by remember { mutableStateOf(false) }
-    var hasPlayerLost by remember { mutableStateOf(false) }
-    var currentPlayerWord by remember { mutableIntStateOf(1) }
-
-    var word1: List<String> by remember { mutableStateOf(listOf("", "", "", "", "")) }
-    var word2: List<String> by remember { mutableStateOf(listOf("", "", "", "", "")) }
-    var word3: List<String> by remember { mutableStateOf(listOf("", "", "", "", "")) }
-    var word4: List<String> by remember { mutableStateOf(listOf("", "", "", "", "")) }
-    var word5: List<String> by remember { mutableStateOf(listOf("", "", "", "", "")) }
-    var word6: List<String> by remember { mutableStateOf(listOf("", "", "", "", "")) }
-
+fun InGameScreen(
+    onNextScreen: () -> Unit,
+    wordleViewModel: WordleViewModel = viewModel()
+) {
+    val uiState by wordleViewModel.uiState.collectAsState()
 
     Column(
         modifier = Modifier
@@ -52,57 +42,24 @@ fun InGameScreen(onNextScreen: () -> Unit) {
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
         GameTitle()
-        HandlePlayerGuess(
-            word = word1,
-            setWord = { word1 = it },
-            wordNumber = 1,
-            currentPlayerWord = currentPlayerWord,
-            setCurrentPlayerWord = { currentPlayerWord = it },
-            setHasPlayerLost = { hasPlayerLost = true},
-            setHasPlayerWon = { hasPlayerWon = true })
-        HandlePlayerGuess(
-            word = word2,
-            setWord = { word2 = it },
-            wordNumber = 2,
-            currentPlayerWord = currentPlayerWord,
-            setCurrentPlayerWord = { currentPlayerWord = it },
-            setHasPlayerLost = { hasPlayerLost = true},
-            setHasPlayerWon = { hasPlayerWon = true })
-        HandlePlayerGuess(
-            word = word3,
-            setWord = { word3 = it },
-            wordNumber = 3,
-            currentPlayerWord = currentPlayerWord,
-            setCurrentPlayerWord = { currentPlayerWord = it },
-            setHasPlayerLost = { hasPlayerLost = true},
-            setHasPlayerWon = { hasPlayerWon = true })
-        HandlePlayerGuess(
-            word = word4,
-            setWord = { word4 = it },
-            wordNumber = 4,
-            currentPlayerWord = currentPlayerWord,
-            setCurrentPlayerWord = { currentPlayerWord = it },
-            setHasPlayerLost = { hasPlayerLost = true},
-            setHasPlayerWon = { hasPlayerWon = true })
-        HandlePlayerGuess(
-            word = word5,
-            setWord = { word5 = it },
-            wordNumber = 5,
-            currentPlayerWord = currentPlayerWord,
-            setCurrentPlayerWord = { currentPlayerWord += 1 },
-            setHasPlayerLost = { hasPlayerLost = true},
-            setHasPlayerWon = { hasPlayerWon = true })
-        HandlePlayerGuess(
-            word = word6,
-            setWord = { word6 = it },
-            wordNumber = 6,
-            currentPlayerWord = currentPlayerWord,
-            setCurrentPlayerWord = { currentPlayerWord = it },
-            setHasPlayerLost = { hasPlayerLost = true},
-            setHasPlayerWon = { hasPlayerWon = true })
+        for (i in 0..5) {
+            HandlePlayerGuess(
+                wordToGuess = wordleViewModel.wordToGuess,
+                word = wordleViewModel.playerGuesses[i].value,
+                onGuessChange = { letterIndex: Int, letter: String ->
+                    wordleViewModel.updatePlayerGuess(
+                        guessIndex = i,
+                        letterIndex = letterIndex,
+                        letter = letter
+                    )
+                },
+                wordIndex = i,
+                currentPlayerWord = uiState.currentPlayerWord,
+                playerMakesGuess = { wordleViewModel.playerMakesGuess(it) },
+            )
+        }
 
-
-        if (hasPlayerWon) {
+        if (uiState.hasPlayerWon) {
             Text(
                 text = "You Win!!!",
                 fontSize = 30.sp,
@@ -112,7 +69,7 @@ fun InGameScreen(onNextScreen: () -> Unit) {
                 Text("Click to finish!")
             }
         }
-        if (hasPlayerLost) {
+        if (uiState.hasPlayerLost) {
             Text(
                 text = "You Lose!!!",
                 fontSize = 30.sp,
@@ -138,41 +95,28 @@ fun GameTitle() {
 }
 
 @Composable
-fun WordInputRow(word: List<String>, onWordChange: (List<String>) -> Unit, isDisabled: Boolean) {
+fun WordInputRow(word: List<String>, onGuessChange: (Int, String) -> Unit, isDisabled: Boolean) {
     val focusManager = LocalFocusManager.current
-
     Row {
         word.forEachIndexed { index, letter: String ->
-            WordInputCard(input = letter, isDisabled, onTextChange = {
-                if (it == "" || it[0].isLetter()) {
-                    val newList = word.toMutableList()
-                    newList[index] = it.uppercase()
-                    onWordChange(newList)
-                }
+            WordInputCard(input = letter, isDisabled, onGuessChange = {
+                onGuessChange(index, it)
             })
             HandleKeyboardFocusChange(letter, index, focusManager)
         }
     }
 }
 
-@Preview(showBackground = true)
-@Composable
-fun WordInputRowPreview() {
-    WordleTheme {
-        WordInputRow(listOf("H", "E", "L", "L", "O"), isDisabled = false, onWordChange = {})
-    }
-}
 
 @Composable
-fun WordInputCard(input: String, isDisabled: Boolean, onTextChange: (String) -> Unit) {
-
+fun WordInputCard(input: String, isDisabled: Boolean, onGuessChange: (String) -> Unit) {
     Card(
         modifier = Modifier.size(width = 50.dp, height = 50.dp),
         border = BorderStroke(width = 2.dp, color = Color.Blue)
     ) {
         TextField(
             value = input,
-            onValueChange = onTextChange,
+            onValueChange = onGuessChange,
             colors = TextFieldDefaults.colors(
                 unfocusedIndicatorColor = Color.Transparent,
                 focusedIndicatorColor = Color.Transparent,
@@ -184,11 +128,10 @@ fun WordInputCard(input: String, isDisabled: Boolean, onTextChange: (String) -> 
 }
 
 @Composable
-fun PlayerGuessResult(word: List<String>) {
+fun PlayerGuessResult(wordToGuess: List<String>, word: List<String>) {
     val borderColors = checkWord(wordToGuess = wordToGuess, guessedWord = word)
     Row {
         word.zip(borderColors).forEach { pair ->
-
             Card(
                 modifier = Modifier.size(width = 50.dp, height = 50.dp),
                 border = BorderStroke(width = 2.dp, color = pair.component2())
@@ -209,13 +152,6 @@ fun PlayerGuessResult(word: List<String>) {
     }
 }
 
-@Preview(showBackground = true)
-@Composable
-fun PlayerGuessResultPreview() {
-    WordleTheme {
-        PlayerGuessResult(listOf("H", "E", "L", "L", "O"))
-    }
-}
 
 @Composable
 private fun HandleKeyboardFocusChange(letter: String, index: Int, focusManager: FocusManager) {
@@ -235,28 +171,25 @@ private fun HandleKeyboardFocusChange(letter: String, index: Int, focusManager: 
 
 @Composable
 fun HandlePlayerGuess(
+    wordToGuess: List<String>,
     word: List<String>,
-    setWord: (List<String>) -> Unit,
-    setHasPlayerWon: (Boolean) -> Unit,
-    wordNumber: Int,
+    onGuessChange: (Int, String) -> Unit,
+    wordIndex: Int,
     currentPlayerWord: Int,
-    setCurrentPlayerWord: (Int) -> Unit,
-    setHasPlayerLost: (Boolean) -> Unit) {
-    if (wordNumber == currentPlayerWord) {
+    playerMakesGuess: (Int) -> Unit,
+) {
+    if (wordIndex == currentPlayerWord) {
         if (word[4].isEmpty()) {
-            WordInputRow(word, setWord, false)
+            WordInputRow(word, onGuessChange, false)
         } else {
-            PlayerGuessResult(word = word)
-            setCurrentPlayerWord(currentPlayerWord + 1)
-            if (wordToGuess == word) setHasPlayerWon(true)
+            PlayerGuessResult(wordToGuess = wordToGuess, word = word)
+            playerMakesGuess(wordIndex)
         }
     } else {
         if (word[4].isEmpty()) {
-            WordInputRow(word, setWord, true)
+            WordInputRow(word, onGuessChange, true)
         } else {
-            PlayerGuessResult(word = word)
-            if (currentPlayerWord == 7) setHasPlayerLost(true)
-
+            PlayerGuessResult(wordToGuess, word = word)
         }
     }
 }
@@ -279,7 +212,6 @@ private fun checkWord(wordToGuess: List<String>, guessedWord: List<String>): Mut
             borderColorsList[index] = Color.Yellow
         }
     }
-
     return borderColorsList
 }
 
